@@ -1,21 +1,18 @@
 const db = require("../utils/database");
-const slug = require("slug");
 const ApiError = require("../utils/apiError");
 const httpStatus = require("http-status");
 
-const Blog = function (blog) {
-    this.blog_title = blog.blog_title,
-    this.blog_slug = slug(blog.blog_title || ""),
-    this.category_id = blog.category_id,
-        this.blog_context = blog.blog_context
+const Comment = function (comment) {
+    this.comment_context = comment.comment_context
 }
 
-Blog.create = async (newBlog, customer_id) => {
+Comment.create = async (newComment) => {
+    let data = []
+    console.log(newComment);
     return new Promise((resolve, reject) => {
-        const query = "INSERT INTO blog SET ?";
-        db.query(query,[ {...newBlog, customer_id}], (err, rs) => {
+        const query = "INSERT INTO comment SET ?";
+        db.query(query, newComment, (err, rs) => {
             if (err) {
-                console.error(err);
                 reject(new ApiError(400, err.message))
             }
             else {
@@ -25,29 +22,24 @@ Blog.create = async (newBlog, customer_id) => {
     });
 }
 
-
-Blog.findAll = async () => {
+Comment.findAll = async () => {
     return new Promise((resolve, reject) => {
-        const query = `SELECT * FROM blog_api.blog left join blog_tag on blog_tag.blog_id = blog.blog_id`;
+        const query = "SELECT * FROM blog_api.comment;";
         db.query(query, (err, rs) => {
             if (err) {
-                console.error(err);
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message))
-            }
-            else {
-                resolve(rs);
+            } else {
+                resolve(rs)
             }
         })
     })
 }
 
-
-Blog.findById = async (id) => {
+Comment.findById = async (id) => {
     return new Promise((resolve, reject) => {
-        const query = "SELECT * FROM blog_api.blog WHERE blog_id = ?";
+        const query = "SELECT * FROM blog_api.comment WHERE comment_id = ?";
         db.query(query, id, (err, rs) => {
             if (err) {
-                console.error(err);
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
             } else {
                 resolve(rs)
@@ -56,12 +48,11 @@ Blog.findById = async (id) => {
     })
 }
 
-Blog.delete = async (id) => {
+Comment.findByBlogId = async (id) => {
     return new Promise((resolve, reject) => {
-        const query = "DELETE FROM blog_api.blog WHERE blog_id = ?";
+        const query = "SELECT * FROM blog_api.comment WHERE blog_id = ?";
         db.query(query, id, (err, rs) => {
             if (err) {
-                console.error(err);
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
             } else {
                 resolve(rs)
@@ -70,10 +61,23 @@ Blog.delete = async (id) => {
     })
 }
 
-Blog.update = async (updateBlog, id) => {
+Comment.delete = async (id) => {
     return new Promise((resolve, reject) => {
-        const query = "UPDATE blog_api.blog SET ? WHERE blog_id = ?";
-        db.query(query, [{ ...updateBlog }, id], (err, rs) => {
+        const query = "DELETE FROM blog_api.comment WHERE comment_id = ?";
+        db.query(query, id, (err, rs) => {
+            if (err) {
+                reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+            } else {
+                resolve(rs)
+            }
+        })
+    })
+}
+
+Comment.update = async (updatecomment, id) => {
+    return new Promise((resolve, reject) => {
+        const query = "UPDATE blog_api.comment SET ? WHERE comment_id = ?";
+        db.query(query, [{...updatecomment }, id], (err, rs) => {
             if (err) {
                 console.error(err);
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
@@ -86,4 +90,5 @@ Blog.update = async (updateBlog, id) => {
         })
     })
 }
-module.exports = Blog;
+
+module.exports = Comment;

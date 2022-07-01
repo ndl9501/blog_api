@@ -23,6 +23,23 @@ Blog_file.create = async (newBlog_file) => {
     })
 }
 
+Blog_file.update = async (updateBlog_file, id) => {
+    return new Promise((resolve, reject) => {
+        const query = "UPDATE blog_api.blog_file SET ? WHERE blog_file_id = ?";
+        db.query(query, [{ ...updateBlog_file }, id], (err, rs) => {
+            if (err) {
+                console.error(err);
+                reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+            } else {
+                if (rs.affectedRows == 0) {
+                    resolve({ "err": "Not Found" })
+                }
+                resolve({ "affectedRows": rs.affectedRows })
+            }
+        })
+    })
+}
+
 Blog_file.findAll = async () => {
     return new Promise((resolve, reject) => {
         const query = "SELECT * FROM blog_api.blog_file;";

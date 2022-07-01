@@ -6,6 +6,7 @@ const categoryRoute = require('./category.route');
 const premisionRoute = require('./premision.route');
 const authRoute = require('./auth.route');
 const blogRoute = require('./blog.route');
+const commentRoute = require('./comment.route');
 
 const router = express.Router();
 
@@ -33,6 +34,10 @@ const defaultRoutes = [
   {
     path: "/blog",
     route: blogRoute
+  },
+  {
+    path: "/comment",
+    route: commentRoute
   }
 ];
 

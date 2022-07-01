@@ -71,8 +71,7 @@ const create = catchAsync(async (req, res, next) => {
 const update = catchAsync(async (req, res, next) => {
 
     const id = req.params.id;
-    // console.log(id);
-    // console.log("c :" , req.body);
+    
     const update = await blogService.update(req.body, id);
     return res.status(httpStatus.OK).json({
         "status": httpStatus.OK,

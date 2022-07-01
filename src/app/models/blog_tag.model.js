@@ -21,6 +21,18 @@ Blog_tag.create = (newBlog_tag)=>{
     })
 }
 
-
+Blog_tag.findByBlogId = async (blog_id) => {
+    return new Promise((resolve, reject) => {
+        const query = "SELECT * FROM blog_api.blog_tag inner join tag on blog_tag.tag_id = tag.tag_id WHERE blog_id = ?";
+        db.query(query, blog_id, (err, rs) => {
+            if (err) {
+                console.error(err);
+                reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+            } else {
+                resolve(rs)
+            }
+        })
+    })
+}
 
 module.exports = Blog_tag;
