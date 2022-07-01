@@ -3,6 +3,7 @@ const cors = require("cors");
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser')
 dotenv.config();
+const config = require('config');
 
 const app = express();
 
@@ -15,6 +16,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+
+app.use("/static", express.static(config.get("app").static_folder));
 
 
 const database = require("./utils/database");
@@ -30,7 +33,8 @@ database.getConnection(function (err, connection){
 app.get("/", (req, res) => {
     res.status(200).json({
         "status": "OK",
-        "msg": "Welcome to blog API"
+        "msg": "Welcome to blog API",
+        "host": req.headers.host
     })
 })
 

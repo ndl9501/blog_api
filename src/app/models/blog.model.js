@@ -3,19 +3,19 @@ const slug = require("slug");
 const ApiError = require("../utils/apiError");
 const httpStatus = require("http-status");
 
-const Tag = function (tag) {
-    this.tag_name = tag.tag_name,
-        this.slug = slug(tag.tag_name, '_'),
-        this.tag_description = tag.tag_description
+const Blog = function (blog) {
+    this.blog_title = blog.blog_title,
+    this.blog_slug = slug(blog.blog_title),
+    this.category_id = blog.category_id,
+        this.blog_context = blog.blog_context
 }
 
-Tag.create = async (newTag) => {
-    let data = []
-    console.log(newTag);
+Blog.create = async (newBlog, customer_id) => {
     return new Promise((resolve, reject) => {
-        const query = "INSERT INTO tag SET ?";
-        db.query(query, newTag, (err, rs) => {
+        const query = "INSERT INTO blog SET ?";
+        db.query(query,[ {...newBlog, customer_id}], (err, rs) => {
             if (err) {
+                console.error(err);
                 reject(new ApiError(400, err.message))
             }
             else {
@@ -25,22 +25,25 @@ Tag.create = async (newTag) => {
     });
 }
 
-Tag.findAll = async () => {
+
+Blog.findAll = async () => {
     return new Promise((resolve, reject) => {
-        const query = "SELECT * FROM blog_api.tag;";
+        const query = `SELECT * FROM blog_api.blog;`;
         db.query(query, (err, rs) => {
             if (err) {
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message))
-            } else {
-                resolve(rs)
+            }
+            else {
+                resolve(rs);
             }
         })
     })
 }
 
-Tag.findById = async (id) => {
+
+Blog.findById = async (id) => {
     return new Promise((resolve, reject) => {
-        const query = "SELECT * FROM blog_api.tag WHERE tag_id = ?";
+        const query = "SELECT * FROM blog_api.blog WHERE blog_id = ?";
         db.query(query, id, (err, rs) => {
             if (err) {
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
@@ -51,9 +54,9 @@ Tag.findById = async (id) => {
     })
 }
 
-Tag.delete = async (id) => {
+Blog.delete = async (id) => {
     return new Promise((resolve, reject) => {
-        const query = "UPDATE blog_api.tag SET published = 0 WHERE tag_id = ?";
+        const query = "DELETE FROM blog_api.blog WHERE blog_id = ?";
         db.query(query, id, (err, rs) => {
             if (err) {
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
@@ -64,10 +67,10 @@ Tag.delete = async (id) => {
     })
 }
 
-Tag.update = async (updateTag, id) => {
+Blog.update = async (updateCategory, id) => {
     return new Promise((resolve, reject) => {
-        const query = "UPDATE blog_api.tag SET ? WHERE tag_id = ?";
-        db.query(query, [{...updateTag }, id], (err, rs) => {
+        const query = "UPDATE blog_api.blog SET ? WHERE category_id = ?";
+        db.query(query, [{ ...updateCategory }, id], (err, rs) => {
             if (err) {
                 console.error(err);
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
@@ -80,5 +83,4 @@ Tag.update = async (updateTag, id) => {
         })
     })
 }
-
-module.exports = Tag;
+module.exports = Blog;

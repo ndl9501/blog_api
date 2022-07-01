@@ -4,8 +4,9 @@ module.exports = {
         PORT : process.env.PORT || 3000,
         static_folder: __dirname +"../src/public",
         tmp: __dirname+"/../temp",
+        PASS_KEY : "password",
         JWT_ACCESS_TOKEN_SECRET : process.env.JWT_ACCESS_TOKEN_SECRET || "JWT_ACCESS_TOKEN_SECRET@blog",
-        JWT_ACCESS_TOKEN_LIFE : process.env.JWT_ACCESS_TOKEN_LIFE || "10m",
+        JWT_ACCESS_TOKEN_LIFE : process.env.JWT_ACCESS_TOKEN_LIFE || "5h",
     },
     db: {
         HOST: process.env.DB_HOST || "localhost",

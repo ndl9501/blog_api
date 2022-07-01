@@ -4,6 +4,7 @@ const ApiError = require('../utils/apiError');
 const tagService = require("../services/tag.service");
 
 const findAll = catchAsync(async (req, res, next) => {
+    console.log("findAll");
     const tags = await tagService.findAll();
     return res.status(httpStatus.OK).json({
         "status": httpStatus.OK,
@@ -50,8 +51,8 @@ const update = catchAsync(async (req, res, next)=>{
 const remove = catchAsync(async (req, res, next)=>{
     console.log(req);
     const remove = await tagService.remove(req.params.id);
-    return res.status(httpStatus.CREATED).json({
-        "status" : httpStatus.CREATED,
+    return res.status(httpStatus.OK).json({
+        "status" : httpStatus.OK,
         "msg" : "success",
         "remove" : remove
     });

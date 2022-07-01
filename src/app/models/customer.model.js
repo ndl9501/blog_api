@@ -1,116 +1,100 @@
 const db = require("../utils/database");
-const bcrypt = require('bcrypt');
+const md5 = require('md5');
+const ApiError = require("../utils/ApiError");
+const httpStatus = require("http-status");
 
 
 
 // constructor
 const Customer = function (customer) {
-    this.customer_phonenumber = customer.customer_phonenumber,
+    this.customer_name = customer.customer_name,
+        this.customer_phonenumber = customer.customer_phonenumber,
         this.customer_email = customer.customer_email,
         this.password = customer.password,
         this.customer_addr = customer.customer_addr,
         this.customer_avatar = customer.customer_avatar,
         this.customer_gender = customer.customer_gender,
-        this.is_deleted = customer.is_deleted || 0,
-        this.createdAt = customer.createdAt,
-        this.updatedAt = customer.updatedAt
+        this.deleted = customer.deleted || 0,
+        this.pre_id = customer.pre_id || 0
 };
 
-Customer.create = async (newCustomer, result) => {
-    const salt = await bcrypt.genSalt(8);
-    newCustomer.password = await bcrypt.hash(newCustomer.password, salt);
-    db.query("INSERT INTO customer SET ?", newCustomer, (err, res) => {
-        if (err) {
-            console.log("error: ", err);
-            result(err, null);
-            return;
-        }
-
-        console.log("created Customer: ", { id: res.insertId, ...newCustomer });
-        result(null, { id: res.insertId, ...newCustomer });
-    });
-};
-
-Customer.findAll = async (result) => {
-    db.query("SELECT * FROM customer WHERE is_deleted=0", (err, res) => {
-        if (err) {
-            console.log("error: ", err);
-            result(err, null);
-            return;
-        }
-
-        console.log("customer: ", { res });
-        result(null, res);
-    });
-};
-
-Customer.findAllWithAdmin = result => {
-    db.query("SELECT * FROM customer ", (err, res) => {
-        if (err) {
-            console.log("error: ", err);
-            result(null, err);
-            return;
-        }
-
-        console.log("Customer: ", res);
-        result(null, res);
-    });
-};
-
-Customer.updateById = (id, customer, result) => {
-    db.query(
-        `UPDATE customer SET customer_phonenumber = ?
-        customer_email = ?
-        customer_addr = ?
-        customer_avatar = ?
-        customer_gender = ?
-        updatedAt = ? 
-        WHERE id = ?`,
-        [
-            customer.customer_phonenumber,
-            customer.customer_email,
-            customer.customer_addr,
-            customer.customer_avatar,
-            customer.customer_gender,
-            new Date(),
-            id
-        ],
-        (err, res) => {
+Customer.create = async (newCustomer) => {
+    newCustomer.password = md5(newCustomer.password);
+    return new Promise((resolve, reject) => {
+        const query = "INSERT INTO customer SET ?";
+        db.query(query, newCustomer, (err, rs) => {
             if (err) {
-                console.log("error: ", err);
-                result(null, err);
-                return;
+                console.error(err);
+                reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+            } else {
+                resolve({ id: rs.insertId });
             }
-
-            if (res.affectedRows == 0) {
-                // not found Customer with the id
-                result({ kind: "not_found" }, null);
-                return;
-            }
-
-            console.log("updated Customer: ", { id: id, ...Customer });
-            result(null, { id: id, ...Customer });
-        }
-    );
+        })
+    })
 };
 
-Customer.remove = (id, result) => {
-    db.query(`UPDATE customer SET is_deleted = 1 WHERE customer_id = ?`, [id], (err, res) => {
-        if (err) {
-            console.log("error: ", err);
-            result(null, err);
-            return;
-        }
-
-        if (res.affectedRows == 0) {
-            // not found Customer with the id
-            result({ message: "not found id by customer" }, null);
-            return;
-        }
-
-        console.log("deleted Customer with id: ", id);
-        result(null, res);
-    });
+Customer.findAll = async () => {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT *
+        FROM blog_api.customer 
+        cross join premision
+        on customer.pre_id = premision.premision_id`;
+        db.query(query, (err, rs) => {
+            if (err) {
+                reject(new ApiError(httpStatus.BAD_REQUEST, err.message))
+            } else {
+                resolve(rs)
+            }
+        })
+    })
 };
+
+Customer.findById = async (id) => {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT *
+        FROM blog_api.customer 
+        cross join premision
+        on customer.pre_id = premision.premision_id
+        WHERE customer_id = ?`;
+        db.query(query, id, (err, rs) => {
+            if (err) {
+                reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+            } else {
+                resolve(rs)
+            }
+        })
+    })
+}
+
+Customer.delete = async (id) => {
+    return new Promise((resolve, reject) => {
+        const query = "UPDATE blog_api.customer SET deleted = 1 WHERE customer_id = ?";
+        db.query(query, id, (err, rs) => {
+            if (err) {
+                reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+            } else {
+                resolve(rs)
+            }
+        })
+    })
+}
+
+Customer.update = async (updateCustomer, id) => {
+    // if(updateCustomer.keys.length)
+    return new Promise((resolve, reject) => {
+        const query = "UPDATE blog_api.customer SET ? WHERE customer_id = ?";
+        db.query(query, [{ ...updateCustomer }, id], (err, rs) => {
+            if (err) {
+                console.error(err);
+                reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+            } else {
+                if (rs.affectedRows == 0) {
+                    resolve({ "err": "Not Found" })
+                }
+                resolve({ "affectedRows": rs.affectedRows })
+            }
+        })
+    })
+}
 
 module.exports = Customer;

@@ -1,40 +1,24 @@
-const jwt = require("jsonwebtoken");
-const config = require("config");
+const AuthModel = require("../models/auth.model");
+const ApiError = require("../utils/ApiError");
 
-const TOKEN_LIFE = config.get("app").JWT_ACCESS_TOKEN_LIFE;
+const login = async (body) => {
+    const auth = new AuthModel(body);
 
-
-const generateToken = (data) => {
-    return new Promise((resolve, reject) => {
-        jwt.sign(
-            {
-                data: data
-            },
-            secret,
-            {
-                algorithm: "HS256",
-                expiresIn: TOKEN_LIFE,
-            },
-            (error, token) => {
-                if (error) {
-                    return reject(error);
-                }
-                resolve(token);
-            });
-    });
+    return await AuthModel.login(auth);
 }
-const verifyToken = (token) => {
-    return new Promise((resolve, reject) => {
-        jwt.verify(token, SECRET_KEY, (error, decoded) => {
-            if (error) {
-                return reject(error);
-            }
-            resolve(decoded);
-        });
-    });
+
+const register = async (body) => {
+    const auth = new AuthModel(body);
+
+    return await AuthModel.register(auth);
+}
+
+const role = async (id) => {
+    return await AuthModel.ROLE(id);
 }
 
 module.exports = {
-    generateToken,
-    verifyToken
+    login,
+    register,
+    role
 }

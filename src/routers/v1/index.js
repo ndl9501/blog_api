@@ -4,6 +4,8 @@ const customerRoute = require('./customer.route');
 const tagRoute = require('./tag.route');
 const categoryRoute = require('./category.route');
 const premisionRoute = require('./premision.route');
+const authRoute = require('./auth.route');
+const blogRoute = require('./blog.route');
 
 const router = express.Router();
 
@@ -21,9 +23,17 @@ const defaultRoutes = [
     route: categoryRoute,
   },
   {
-    path: '/',
+    path: '/premision',
     route: premisionRoute,
   },
+  {
+    path: "/auth",
+    route: authRoute
+  },
+  {
+    path: "/blog",
+    route: blogRoute
+  }
 ];
 
 

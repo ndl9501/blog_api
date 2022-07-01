@@ -1,17 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const customerController = require("../../app/controllers/customer.controller")
+const customerValidation = require("../../app/validations/customer.validation");
+const Validation = require("../../app/middlewares/validate.middleware");
+const authMiddleware = require("../../app/middlewares/auth.middleware");
+
+
 router.route("/")
-    .get(customerController.getAllCustomer)
-    .post(customerController.createCustomer)
+    .get(authMiddleware.isAdmin,customerController.findAll)
+    .post(Validation(customerValidation.create), customerController.create)
 
 router.route('/:id')
-    .get(customerController.getCustomerByID)
-    .put(customerController.updateCustomer)
-    .delete(customerController.deleteCustomer)
+    .get(customerController.findById)
+    .put(Validation(customerValidation.update), customerController.update)
+    .delete(authMiddleware.isAdmin, customerController.remove)
 
-router.route("/all")
-    .get(customerController.getAllCustomerWithAdmin)
 
 
 module.exports = router

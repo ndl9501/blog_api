@@ -1,153 +1,61 @@
+const httpStatus = require('http-status');
 const catchAsync = require("../utils/catchAsync");
-const customerModel = require("../models/customer.model");
+const ApiError = require("../utils/ApiError");
+const customerService = require("../services/customer.service")
 
-const getAllCustomer = catchAsync((req, res, next) => {
-    // throw new Error("hehe");
-    customerModel.findAll((err, rs) => {
-        if (err) {
-            res.status(500).send({
-                message:
-                    err.message || "Some error ."
-            }); 
-        }
-        else res.status(200).json({
-            "status": 200,
-            "msg": "success",
-            "customers": rs
-        })
+const findAll = catchAsync(async (req, res, next) => {
+    const customers = await customerService.findAll();
+    return res.status(httpStatus.OK).json({
+        "status": httpStatus.OK,
+        "msg": "success",
+        customers
     })
-
 })
-const getAllCustomerWithAdmin = catchAsync((req, res, next) => {
-    // throw new Error("hehe");
-    console.log("getAllCustomerWithAdmin");
-    customerModel.findAllWithAdmin((err, rs) => {
-        if (err) {
-            res.status(500).send({
-                message:
-                    err.message || "Some error ."
-            });
-        }
-        else res.status(200).json({
-            "status": 200,
-            "msg": "success",
-            "customer": rs
-        })
-    })
 
+const findById = catchAsync(async (req, res, next) => {
+    const customer = await customerService.findById(req.params.id);
+    return res.status(httpStatus.OK).json({
+        "status": httpStatus.OK,
+        "msg": "success",
+        customer
+    })
+})
+
+const create = catchAsync(async (req, res, next) => {
+    const customer = await customerService.create(req.body);
+    return res.status(httpStatus.CREATED).json({
+        "status" : httpStatus.CREATED,
+        "msg" : "success",
+        "insertId" : customer.id
+    })
 })
 
 
-const getCustomerByID = catchAsync((req, res, next) => {
-    // throw new Error("hehe");
-    customerModel.findAll((err, rs) => {
-        if (err) {
-            res.status(500).send({
-                message:
-                    err.message || "Some error ."
-            });
-        }
-        else res.status(200).json({
-            "status": 200,
-            "msg": "success",
-            "customer": rs
-        })
+const update = catchAsync(async (req, res, next) => {
+    const id = req.params.id;
+    const update = await customerService.update(req.body, id);
+    return res.status(httpStatus.OK).json({
+        "status" : httpStatus.OK,
+        "msg" : "success",
+        "update" : update
     })
-
 })
-const createCustomer = catchAsync((req, res, next) => {
-    if (!req.body) {
-        res.status(400).json({
-            message: "Content can not be empty!"
-        });
-    }
+
+const remove = catchAsync(async (req, res, next) => {
     console.log(req.body);
-    const newCustomer = new customerModel({
-        customer_phonenumber: req.body.customer_phonenumber,
-        customer_email: req.body.customer_email,
-        password: req.body.password,
-        customer_addr: req.body.customer_addr,
-        customer_avatar: req.body.customer_avatar,
-        customer_gender: req.body.customer_gender,
-        createdAt: new Date(),
-        updatedAt: new Date()
-    });
-    console.log(req.body);
-    customerModel.create(newCustomer, (err, data) => {
-        if (err) {
-            res.status(500).json({
-                message:
-                    err.message || "Some error occurred while creating the Customer."
-            });
-        }
-        else res.status(201).json({
-            "status": 201,
-            "msg": "success",
-            "customer": data,
-        });
+    const remove = await customerService.remove(req.params.id);
+    return res.status(httpStatus.OK).json({
+        "status" : httpStatus.OK,
+        "msg" : "success",
+        "remove" : remove
     });
 })
 
-const updateCustomer = catchAsync((req, res, next) => {
-    if (!req.body) {
-        return res.status(400).json({
-            message: "Content can not be empty!"
-        });
-    }
-    if (!req.params.id) {
-        return res.status(400).json({
-            message: "Id can not be empty!"
-        });
-    }
-    const updateCustomer = new customerModel({
-        customer_phonenumber: req.body.customer_phonenumber,
-        customer_email: req.body.customer_email,
-        customer_addr: req.body.customer_addr,
-        customer_avatar: req.body.customer_avatar,
-        customer_gender: req.body.customer_gender,
-    });
-    console.log(req.body);
-    customerModel.updateById(req.params.id, updateCustomer, (err, data) => {
-        if (err) {
-            res.status(500).json({
-                message:
-                    err.message || "Some error occurred while creating the Customer."
-            });
-        }
-        else {
-            return res.status(201).json({
-                "status": 201,
-                "msg": "success",
-                "customer": data,
-            });
-        }
-    });
-})
-const deleteCustomer = catchAsync((req, res, next) => {
-    if (!req.params.id) {
-        return res.status(400).json({
-            message: "Id can not be empty!"
-        });
-    }
-    customerModel.remove(req.params.id, (err, data) => {
-        if (err) {
-            console.log(err);
-            res.status(500).json({
-                message: err.message || "Some error occurred while creating the Customer."
-            });
-        } else {
-            return res.status(200).json({
-                "status": 200,
-                "msg": "success"
-            });
-        }
-    })
-})
+
 module.exports = {
-    getAllCustomer,
-    createCustomer,
-    updateCustomer,
-    getAllCustomerWithAdmin,
-    getCustomerByID,
-    deleteCustomer
+    findAll,
+    findById,
+    create,
+    update,
+    remove
 }

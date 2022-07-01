@@ -18,7 +18,7 @@ Premision.create = async (newPremision)=>{
                 console.error(err);
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
             }else{
-                resolve(rs);
+                resolve({ id: rs.insertId });
             }
         })
     })
@@ -53,7 +53,7 @@ Premision.findById = async (id) => {
 
 Premision.delete = async (id) => {
     return new Promise((resolve, reject) => {
-        const query = "UPDATE blog_api.premision SET published = 0 WHERE Premision_id = ?";
+        const query = "DELETE FROM `blog_api`.`premision` WHERE premision_id = ?";
         db.query(query, id, (err, rs) => {
             if (err) {
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
@@ -66,7 +66,7 @@ Premision.delete = async (id) => {
 
 Premision.update = async (updatePremision, id) => {
     return new Promise((resolve, reject) => {
-        const query = "UPDATE blog_api.premision SET ? WHERE premision = ?";
+        const query = "UPDATE blog_api.premision SET ? WHERE premision_id = ?";
         db.query(query, [{...updatePremision }, id], (err, rs) => {
             if (err) {
                 console.error(err);
