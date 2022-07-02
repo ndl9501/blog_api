@@ -1,7 +1,7 @@
 
 const httpStatus = require("http-status");
 const blogModel = require("../models/blog.model");
-const Blog_file = require("../models/blog_file.model");
+const blog_file = require("../models/blog_file.model");
 const Blog_tag = require("../models/blog_tag.model");
 const commentModel = require("../models/comment.model");
 const ApiError = require("../utils/apiError");
@@ -13,7 +13,7 @@ const findAll = async () => {
             for (const element of rs) {
                 element.files = [];
                 if (element?.blog_id) {
-                    const files = await Blog_file.findByBlogId(element.blog_id)
+                    const files = await blog_file.findByBlogId(element.blog_id)
                     element.files = files;
                 }
             }
@@ -49,7 +49,7 @@ const findById = async (id) => {
             for (const element of rs) {
                 element.files = [];
                 if (element?.blog_id) {
-                    const files = await Blog_file.findByBlogId(element.blog_id)
+                    const files = await blog_file.findByBlogId(element.blog_id)
                     element.files = files;
                 }
             }

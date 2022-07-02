@@ -12,7 +12,7 @@ router.route("/")
 
 router.route("/:id")
     .get(commentController.findById)
-    .put(authMiddleware.isAuth, validateMiddleware(commentValidation.update), commentController.update)
+    .put(authMiddleware.isAdmin, validateMiddleware(commentValidation.update), commentController.update)
     .delete(authMiddleware.isAdmin, commentController.remove)
 
 

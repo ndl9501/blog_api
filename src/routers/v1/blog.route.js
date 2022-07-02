@@ -15,7 +15,7 @@ router.route("/")
 
 router.route("/:id")
     .get(blogController.findById)
-    .put(validateMiddleware(blogValidation.update) , blogController.update)
+    .put(authMiddleware.isAdmin,validateMiddleware(blogValidation.update) , blogController.update)
     .delete(authMiddleware.isAdmin, blogController.remove)
 
 

@@ -21,60 +21,92 @@ const Customer = function (customer) {
 Customer.create = async (newCustomer) => {
     newCustomer.password = md5(newCustomer.password);
     return new Promise((resolve, reject) => {
-        const query = "INSERT INTO customer SET ?";
-        db.query(query, newCustomer, (err, rs) => {
+        db.beginTransaction((err) => {
             if (err) {
-                console.error(err);
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
-            } else {
-                resolve({ id: rs.insertId });
             }
+            const query = "INSERT INTO customer SET ?";
+            db.query(query, newCustomer, (err, rs) => {
+                if (err) {
+                    db.rollback((err) => {
+                        console.error(err);
+                    });
+                    console.error(err);
+                    reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+                } else {
+                    resolve({ id: rs.insertId });
+                }
+            })
         })
     })
 };
 
 Customer.findAll = async () => {
     return new Promise((resolve, reject) => {
-        const query = `SELECT *
+        db.beginTransaction((err) => {
+            if (err) {
+                reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+            }
+            const query = `SELECT *
         FROM blog_api.customer 
         cross join premision
         on customer.pre_id = premision.premision_id`;
-        db.query(query, (err, rs) => {
-            if (err) {
-                reject(new ApiError(httpStatus.BAD_REQUEST, err.message))
-            } else {
-                resolve(rs)
-            }
+            db.query(query, (err, rs) => {
+                if (err) {
+                    db.rollback((err) => {
+                        console.error(err);
+                    });
+                    reject(new ApiError(httpStatus.BAD_REQUEST, err.message))
+                } else {
+                    resolve(rs)
+                }
+            })
         })
     })
 };
 
 Customer.findById = async (id) => {
     return new Promise((resolve, reject) => {
-        const query = `SELECT *
+        db.beginTransaction((err) => {
+            if (err) {
+                reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+            }
+            const query = `SELECT *
         FROM blog_api.customer 
         cross join premision
         on customer.pre_id = premision.premision_id
         WHERE customer_id = ?`;
-        db.query(query, id, (err, rs) => {
-            if (err) {
-                reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
-            } else {
-                resolve(rs)
-            }
+            db.query(query, id, (err, rs) => {
+                if (err) {
+                    db.rollback((err) => {
+                        console.error(err);
+                    });
+                    reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+                } else {
+                    resolve(rs)
+                }
+            })
         })
     })
 }
 
 Customer.delete = async (id) => {
     return new Promise((resolve, reject) => {
-        const query = "UPDATE blog_api.customer SET deleted = 1 WHERE customer_id = ?";
-        db.query(query, id, (err, rs) => {
+        db.beginTransaction((err) => {
             if (err) {
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
-            } else {
-                resolve(rs)
             }
+            const query = "UPDATE blog_api.customer SET deleted = 1 WHERE customer_id = ?";
+            db.query(query, id, (err, rs) => {
+                if (err) {
+                    db.rollback((err) => {
+                        console.error(err);
+                    });
+                    reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+                } else {
+                    resolve(rs)
+                }
+            })
         })
     })
 }
@@ -82,17 +114,25 @@ Customer.delete = async (id) => {
 Customer.update = async (updateCustomer, id) => {
     // if(updateCustomer.keys.length)
     return new Promise((resolve, reject) => {
-        const query = "UPDATE blog_api.customer SET ? WHERE customer_id = ?";
-        db.query(query, [{ ...updateCustomer }, id], (err, rs) => {
+        db.beginTransaction((err) => {
             if (err) {
-                console.error(err);
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
-            } else {
-                if (rs.affectedRows == 0) {
-                    resolve({ "err": "Not Found" })
-                }
-                resolve({ "affectedRows": rs.affectedRows })
             }
+            const query = "UPDATE blog_api.customer SET ? WHERE customer_id = ?";
+            db.query(query, [{ ...updateCustomer }, id], (err, rs) => {
+                if (err) {
+                    db.rollback((err) => {
+                        console.error(err);
+                    });
+                    console.error(err);
+                    reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+                } else {
+                    if (rs.affectedRows == 0) {
+                        resolve({ "err": "Not Found" })
+                    }
+                    resolve({ "affectedRows": rs.affectedRows })
+                }
+            })
         })
     })
 }

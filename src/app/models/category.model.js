@@ -14,15 +14,23 @@ Category.create = async (newCategory) => {
     let data = []
     // console.log(newCategory);
     return new Promise((resolve, reject) => {
-        const query = "INSERT INTO category SET ?";
-        db.query(query, newCategory, (err, rs) => {
+        db.beginTransaction((err) => {
             if (err) {
-                console.error(err);
-                reject(new ApiError(400, err.message))
+                reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
             }
-            else {
-                resolve({ id: rs.insertId });
-            }
+            const query = "INSERT INTO category SET ?";
+            db.query(query, newCategory, (err, rs) => {
+                if (err) {
+                    db.rollback((err) => {
+                        console.error(err);
+                    });
+                    console.error(err);
+                    reject(new ApiError(400, err.message))
+                }
+                else {
+                    resolve({ id: rs.insertId });
+                }
+            })
         })
     });
 }
@@ -30,14 +38,22 @@ Category.create = async (newCategory) => {
 
 Category.findAll = async () => {
     return new Promise((resolve, reject) => {
-        const query = `SELECT * FROM blog_api.category;`;
-        db.query(query, (err, rs) => {
+        db.beginTransaction((err) => {
             if (err) {
-                reject(new ApiError(httpStatus.BAD_REQUEST, err.message))
+                reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
             }
-            else {
-                resolve(rs);
-            }
+            const query = `SELECT * FROM blog_api.category;`;
+            db.query(query, (err, rs) => {
+                if (err) {
+                    db.rollback((err) => {
+                        console.error(err);
+                    });
+                    reject(new ApiError(httpStatus.BAD_REQUEST, err.message))
+                }
+                else {
+                    resolve(rs);
+                }
+            })
         })
     })
 }
@@ -45,43 +61,67 @@ Category.findAll = async () => {
 
 Category.findById = async (id) => {
     return new Promise((resolve, reject) => {
-        const query = "SELECT * FROM blog_api.category WHERE category_id = ?";
-        db.query(query, id, (err, rs) => {
+        db.beginTransaction((err) => {
             if (err) {
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
-            } else {
-                resolve(rs)
             }
+            const query = "SELECT * FROM blog_api.category WHERE category_id = ?";
+            db.query(query, id, (err, rs) => {
+                if (err) {
+                    db.rollback((err) => {
+                        console.error(err);
+                    });
+                    reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+                } else {
+                    resolve(rs)
+                }
+            })
         })
     })
 }
 
 Category.delete = async (id) => {
     return new Promise((resolve, reject) => {
-        const query = "UPDATE blog_api.category SET published = 0 WHERE category_id = ?";
-        db.query(query, id, (err, rs) => {
+        db.beginTransaction((err) => {
             if (err) {
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
-            } else {
-                resolve(rs)
             }
+            const query = "UPDATE blog_api.category SET published = 0 WHERE category_id = ?";
+            db.query(query, id, (err, rs) => {
+                if (err) {
+                    db.rollback((err) => {
+                        console.error(err);
+                    });
+                    reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+                } else {
+                    resolve(rs)
+                }
+            })
         })
     })
 }
 
 Category.update = async (updateCategory, id) => {
     return new Promise((resolve, reject) => {
-        const query = "UPDATE blog_api.category SET ? WHERE category_id = ?";
-        db.query(query, [{ ...updateCategory }, id], (err, rs) => {
+        db.beginTransaction((err) => {
             if (err) {
-                console.error(err);
                 reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
-            } else {
-                if (rs.affectedRows == 0) {
-                    resolve({ "err": "Not Found" })
-                }
-                resolve({ "affectedRows": rs.affectedRows })
             }
+            const query = "UPDATE blog_api.category SET ? WHERE category_id = ?";
+            db.query(query, [{ ...updateCategory }, id], (err, rs) => {
+                if (err) {
+                    db.rollback((err) => {
+                        console.error(err);
+                    });
+                    console.error(err);
+                    reject(new ApiError(httpStatus.BAD_REQUEST, err.message));
+                } else {
+                    if (rs.affectedRows == 0) {
+                        resolve({ "err": "Not Found" })
+                    }
+                    resolve({ "affectedRows": rs.affectedRows })
+                }
+            })
         })
     })
 }

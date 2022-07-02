@@ -10,14 +10,14 @@ const login = catchAsync(async (req, res, next) => {
         return res.status(httpStatus.OK).json({
             "status": httpStatus.OK,
             "msg": "success",
-            "customer": customer,
+            "data": customer,
             "token": token
         })
     }else{
         return res.status(httpStatus.OK).json({
             "status": httpStatus.OK,
             "msg": "login is fail",
-            "customer": {}
+            "data": {}
         })
     }
     
@@ -30,7 +30,7 @@ const register = catchAsync(async (req, res, next) => {
     return res.status(httpStatus.CREATED).json({
         "status": httpStatus.CREATED,
         "msg": "success",
-        "customer": register,
+        "data": register,
         "token": token
     })
 })

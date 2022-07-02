@@ -13,7 +13,7 @@ const findAll = catchAsync(async (req, res, next) => {
     return res.status(httpStatus.OK).json({
         "status": httpStatus.OK,
         "msg": "success",
-        blogs
+        "data": blogs
     });
 })
 const findById = catchAsync(async (req, res, next) => {
@@ -21,7 +21,7 @@ const findById = catchAsync(async (req, res, next) => {
     return res.status(httpStatus.OK).json({
         "status": httpStatus.OK,
         "msg": "success",
-        blog
+        "data": blog
     })
 })
 const create = catchAsync(async (req, res, next) => {
@@ -51,17 +51,17 @@ const create = catchAsync(async (req, res, next) => {
 
             }
         }
-        if(req.body.tag){
-            
+        if (req.body.tag) {
+
             for (const tag of req.body.tag) {
                 // console.log(tag);
-                blog_tagService.create( blog.id,tag);
+                blog_tagService.create(blog.id, tag);
             }
         }
         return res.status(httpStatus.CREATED).json({
             "status": httpStatus.CREATED,
             "msg": "success",
-            "insertId": blog.id
+            "data": blog.id
         });
     }
     else {
@@ -71,7 +71,7 @@ const create = catchAsync(async (req, res, next) => {
 const update = catchAsync(async (req, res, next) => {
 
     const id = req.params.id;
-    
+
     const update = await blogService.update(req.body, id);
     return res.status(httpStatus.OK).json({
         "status": httpStatus.OK,

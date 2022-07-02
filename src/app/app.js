@@ -5,6 +5,8 @@ const bodyParser = require('body-parser')
 dotenv.config();
 const config = require('config');
 
+const { authLimiter } = require("../app/middlewares/rateLimit")
+
 const app = express();
 
 // DEV
@@ -21,12 +23,11 @@ app.use("/static", express.static(config.get("app").static_folder));
 
 
 const database = require("./utils/database");
-database.getConnection(function (err, connection){
-    if(err){
-        console.log(err);
-        process.exit(1);
-    }else{
-        console.log("DB connected");
+database.query("select 1", 1, (err, rs) => {
+    if (err) {
+        console.error(err);
+    } else {
+        console.log(`db connected`);
     }
 })
 
@@ -37,6 +38,8 @@ app.get("/", (req, res) => {
         "host": req.headers.host
     })
 })
+
+app.use("/v1/auth", authLimiter)
 
 app.use(require("../routers/index"))
 
@@ -56,6 +59,8 @@ app.use((err, req, res, next) => {
     const error = app.get('env') === "development" ? err : {};
     const status = err.status || 500;
     return res.status(status).json({
+        "status": status,
+        "msg": "error",
         error: {
             message: error.message
         }

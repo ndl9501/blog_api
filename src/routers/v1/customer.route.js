@@ -12,7 +12,7 @@ router.route("/")
 
 router.route('/:id')
     .get(customerController.findById)
-    .put(Validation(customerValidation.update), customerController.update)
+    .put(authMiddleware.isAdmin, Validation(customerValidation.update), customerController.update)
     .delete(authMiddleware.isAdmin, customerController.remove)
 
 
